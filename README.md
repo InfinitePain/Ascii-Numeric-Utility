@@ -10,6 +10,12 @@ The project is structured as follows:
 - `aufgaben.h`: This header file contains the definitions for the tasks performed by the program.
 - `utilities.h` and `utilities.c`: These files contain utility functions for the project, including functions for reading from the console with additional control over input. The utilities also include a menu for task selection, implemented using the `ncurses` library.
 
+## Code Improvements and User Interface Enhancement
+
+This project began as a straightforward assignment with simple solutions. However, with the passage of time and increased experience in C programming, I decided to revisit and refine the code. These enhancements, though not part of the original assignment, were introduced as a personal initiative to improve code quality, learn new concepts, and make the program more user-friendly.
+
+A significant upgrade has been the integration of the `ncurses` library, which has transformed the program's user interface. The terminal menu is now more interactive and user-friendly, providing a more engaging experience when selecting tasks.
+
 ## Compilation and Execution
 
 To compile and run the program, follow these steps:
@@ -19,13 +25,13 @@ To compile and run the program, follow these steps:
 3. Open a terminal and navigate to the directory containing the source files.
 4. Compile the program using the following command:
 
-   ```
+   ```bash
    gcc -o Ascii-Numeric-Utility main.c utilities.c -lncurses
    ```
 
 5. Run the compiled program with:
 
-   ```
+   ```bash
    ./Ascii-Numeric-Utility
    ```
 
