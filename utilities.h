@@ -9,7 +9,7 @@
 
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
- 
+
 #include <stdbool.h>
 #include <menu.h>
 
@@ -25,7 +25,7 @@ bool create_app_menu();
 void print_menu();
 void erase_menu(MENU *menu);
 void custom_menu_driver(int key);
-int read_int(int max_digits);
-void read_string(char *string, int max_chars);
+void scanInt(int max_digits, int *result);
+void scanString(int max_chars, char *string);
 
 #endif /*UTILITIES_H_*/

@@ -193,78 +193,194 @@ void custom_menu_driver(int key)
 	}
 }
 
-int read_int(int max_digits)
+void shift_elements(char *input, int start, int end, int direction)
 {
-    char input[max_digits + 1];
-    int pos = 0;
-    int ch;
-
-    while (1)
-    {
-        ch = getch();
-
-        if (ch >= '0' && ch <= '9' && pos < max_digits)
-        {
-            input[pos++] = ch;
-            addch(ch);
-        }
-        else if (ch == '\n' || ch == '\r')
-        {
-            addch('\n');
-            break;
-        }
-        else if (ch == KEY_BACKSPACE || ch == '\b' || ch == 127)
-        {
-            if (pos > 0)
-            {
-                pos--;
-                move(getcury(stdscr), getcurx(stdscr) - 1);
-                delch();
-            }
-        }
-        else
-        {
-            beep();
-        }
-    }
-
-    input[pos] = '\0';
-    return atoi(input);
-    
+	if (direction < 0) // left shift
+	{
+		for (int i = start; i <= end; i++)
+		{
+			input[i] = input[i + 1];
+		}
+	}
+	else // right shift
+	{
+		for (int i = end; i >= start; i--)
+		{
+			input[i + 1] = input[i];
+		}
+	}
 }
 
-void read_string(char *string, int buffer_length) {
-    int pos = 0;
-    int ch;
+void scanInt(int max_digits, int *result)
+{
+	curs_set(1);
+	char input[max_digits + 1];
+	for (int i = 0; i < max_digits + 1; i++)
+		input[i] = '\0';
 
-    while (1)
-    {
-        ch = getch();
+	int pos = 0;
+	int len = 0;
+	int ch;
+	int max_y, max_x;
+	getmaxyx(stdscr, max_y, max_x);
 
-        if (ch >= ' ' && ch <= '~' && pos < buffer_length)
-        {
-            string[pos++] = ch;
-            addch(ch);
-        }
-        else if (ch == '\n' || ch == '\r')
-        {
-            addch('\n');
-            break;
-        }
-        else if (ch == KEY_BACKSPACE || ch == '\b' || ch == 127)
-        {
-            if (pos > 0)
-            {
-                pos--;
-                move(getcury(stdscr), getcurx(stdscr) - 1);
-                delch();
-            }
-        }
-        else
-        {
-            beep();
-        }
-    }
+	int y, x;
+	getyx(stdscr, y, x);
 
-    string[pos] = '\0';
+	while (1)
+	{
+		ch = getch();
+
+		if (ch >= '0' && ch <= '9' && len < max_digits)
+		{
+			if (x + len >= max_x)
+			{
+				beep();
+				continue;
+			}
+			shift_elements(input, pos, len++, 1);
+			input[pos++] = ch;
+			for (int i = 0; i < len; i++)
+				mvwaddch(stdscr, y, x + i, input[i]);
+			move(y, x + pos);
+		}
+		else if (ch == KEY_BACKSPACE || ch == '\b' || ch == 127)
+		{
+			if (pos > 0)
+			{
+				shift_elements(input, --pos, --len, -1);
+				mvwaddch(stdscr, y, x + len, ' ');
+				for (int i = 0; i < len; i++)
+					mvwaddch(stdscr, y, x + i, input[i]);
+				move(y, x + pos);
+			}
+			else
+				beep();
+		}
+		else if (ch == KEY_DC)
+		{
+			if (pos < len)
+			{
+				shift_elements(input, pos, --len, -1);
+				mvwaddch(stdscr, y, x + len, ' ');
+				for (int i = 0; i < len; i++)
+					mvwaddch(stdscr, y, x + i, input[i]);
+				move(y, x + pos);
+			}
+			else
+				beep();
+		}
+		else if (ch == KEY_LEFT && pos > 0)
+		{
+			move(y, x + --pos);
+		}
+		else if (ch == KEY_RIGHT && pos < len)
+		{
+			move(y, x + ++pos);
+		}
+		else if (ch == '\n' || ch == '\r')
+		{
+			move(y + 1, 0);
+			break;
+		}
+		else if (ch == 27)
+		{
+			*result = -1;
+			curs_set(0);
+			return;
+		}
+		else
+		{
+			beep();
+		}
+		refresh();
+	}
+	refresh();
+	curs_set(0);
+	*result = atoi(input);
+}
+
+void scanString(int buffer_length, char *string)
+{
+	curs_set(1);
+	for (int i = 0; i < buffer_length; i++)
+		string[i] = '\0';
+
+	int pos = 0;
+	int len = 0;
+	int ch;
+	int max_y, max_x;
+	getmaxyx(stdscr, max_y, max_x);
+
+	int y, x;
+	getyx(stdscr, y, x);
+
+	while (1)
+	{
+		ch = getch();
+
+		if (ch >= ' ' && ch <= '~' && len < buffer_length)
+		{
+			if (x + len >= max_x)
+			{
+				beep();
+				continue;
+			}
+			shift_elements(string, pos, len++, 1);
+			string[pos++] = ch;
+			for (int i = 0; i < len; i++)
+				mvwaddch(stdscr, y, x + i, string[i]);
+			move(y, x + pos);
+		}
+		else if (ch == KEY_BACKSPACE || ch == '\b' || ch == 127)
+		{
+			if (pos > 0)
+			{
+				shift_elements(string, --pos, --len, -1);
+				mvwaddch(stdscr, y, x + len, ' ');
+				for (int i = 0; i < len; i++)
+					mvwaddch(stdscr, y, x + i, string[i]);
+				move(y, x + pos);
+			}
+			else
+				beep();
+		}
+		else if (ch == KEY_DC)
+		{
+			if (pos < len)
+			{
+				shift_elements(string, pos, --len, -1);
+				mvwaddch(stdscr, y, x + len, ' ');
+				for (int i = 0; i < len; i++)
+					mvwaddch(stdscr, y, x + i, string[i]);
+				move(y, x + pos);
+			}
+			else
+				beep();
+		}
+		else if (ch == KEY_LEFT && pos > 0)
+		{
+			move(y, x + --pos);
+		}
+		else if (ch == KEY_RIGHT && pos < len)
+		{
+			move(y, x + ++pos);
+		}
+		else if (ch == '\n' || ch == '\r')
+		{
+			move(y + 1, 0);
+			break;
+		}
+		else if (ch == 27)
+		{
+			string[0] = '\0';
+			break;
+		}
+		else
+		{
+			beep();
+		}
+	}
+
+	curs_set(0);
 }

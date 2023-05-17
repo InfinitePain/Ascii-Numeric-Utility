@@ -16,7 +16,7 @@
 #include "utilities.h"
 
 void Aufgabe1()
-{    
+{
     printw("Aufgabe 1 - ASCII ART\n");
     printw("\n");
     printw("  (\x022`-''-/\x022).___..--''\x022`-._\n");
@@ -45,8 +45,26 @@ void Aufgabe2()
 
     printw("Aufgabe 2 - Quersumme\n");
     printw("\n");
+    printw("Hinweis:\n");
+    printw("0 oder direktes Druecken von Enter generiert Zufallszahl.\n");
     printw("Geben Sie gewuenschte 4-stellige Zahl ein: ");
-    zahl = read_int(4);
+    scanInt(4, &zahl);
+
+    if (zahl == -1)
+    {
+        clear();
+        refresh();
+        return;
+    }
+    else if (zahl == 0)
+    {
+        zahl = rand() % 9999 + 1;
+    }
+
+    mvprintw(4, 43, "%i", zahl);
+    printw("\n");
+    refresh();
+
     einer = zahl % 10;
     zehner = (zahl / 10) % 10;
     hunderter = (zahl / 100) % 10;
@@ -69,33 +87,35 @@ void Aufgabe3()
     int minuten;
     int sekunden;
     int try_counter = 0;
+    bool validInput = false;
+    int posy = 4;
 
     printw("Aufgabe 3 - Uhrzeit (Teil 1)\n");
     printw("\n");
-    printw("Geben Sie die Stunden ein (0-23): ");
-    stunden = read_int(2);
-    while (stunden < 0 || stunden > 23)
+    printw("Hinweis:\n");
+    printw("0 oder direktes Druecken von Enter generiert Zufallszahl.\n");
+
+    while (!validInput)
     {
-        if (++try_counter >= 3)
-        {
-            printw("Zu viele ungueltige Eingaben.\n");
-            printw("Druecken Sie eine beliebige Taste, um fortzufahren...\n");
-            getch();
-            refresh();
-            clear();
-            refresh();
-            return;
-        }
-        printw("Ungueltige Stundeneingabe!\n");
         printw("Geben Sie die Stunden ein (0-23): ");
-        stunden = read_int(2);
-    }
+        scanInt(2, &stunden);
+        if (stunden == -1)
+        {
+            clear();
+            refresh();
+            return;
+        }
+        else if (stunden == 0 || (stunden > 0 && stunden <= 23))
+        {
+            validInput = true;
+        }
+        else
+        {
+            mvprintw(posy++, 0, "Ungueltige Eingabe!\n");
+            try_counter++;
+        }
 
-    printw("Geben Sie die Minuten ein (0-59): ");
-    minuten = read_int(2);
-    while (minuten < 0 || minuten > 59)
-    {
-        if (++try_counter >= 3)
+        if (try_counter >= 3)
         {
             printw("Zu viele ungueltige Eingaben.\n");
             printw("Druecken Sie eine beliebige Taste, um fortzufahren...\n");
@@ -105,16 +125,37 @@ void Aufgabe3()
             refresh();
             return;
         }
-        printw("Ungueltige Minuteneingabe!\n");
+    }
+    posy++;
+    validInput = false;
+
+    if (stunden == 0)
+    {
+        stunden = rand() % 24;
+    }
+    mvprintw(getcury(stdscr) - 1, 34, "%i\n", stunden);
+
+    while (!validInput)
+    {
         printw("Geben Sie die Minuten ein (0-59): ");
-        minuten = read_int(2);
-    }
+        scanInt(2, &minuten);
+        if (minuten == -1)
+        {
+            clear();
+            refresh();
+            return;
+        }
+        else if (minuten == 0 || (minuten > 0 && minuten <= 59))
+        {
+            validInput = true;
+        }
+        else
+        {
+            mvprintw(posy++, 0, "Ungueltige Eingabe!\n");
+            try_counter++;
+        }
 
-    printw("Geben Sie die Sekunden ein (0-59): ");
-    sekunden = read_int(2);
-    while (sekunden < 0 || sekunden > 59)
-    {
-        if (++try_counter >= 3)
+        if (try_counter >= 3)
         {
             printw("Zu viele ungueltige Eingaben.\n");
             printw("Druecken Sie eine beliebige Taste, um fortzufahren...\n");
@@ -124,10 +165,55 @@ void Aufgabe3()
             refresh();
             return;
         }
-        printw("Ungueltige Sekundeneingabe!\n");
-        printw("Geben Sie die Sekunden ein (0-59): ");
-        sekunden = read_int(2);
     }
+    posy++;
+    validInput = false;
+
+    if (minuten == 0)
+    {
+        minuten = rand() % 60;
+    }
+    mvprintw(getcury(stdscr) - 1, 34, "%i\n", minuten);
+
+    while (!validInput)
+    {
+        printw("Geben Sie die Sekunden ein (0-59): ");
+        scanInt(2, &sekunden);
+        if (sekunden == -1)
+        {
+            clear();
+            refresh();
+            return;
+        }
+        else if (sekunden == 0 || (sekunden > 0 && sekunden <= 59))
+        {
+            validInput = true;
+        }
+        else
+        {
+            mvprintw(posy++, 0, "Ungueltige Eingabe!\n");
+            try_counter++;
+        }
+
+        if (try_counter >= 3)
+        {
+            printw("Zu viele ungueltige Eingaben.\n");
+            printw("Druecken Sie eine beliebige Taste, um fortzufahren...\n");
+            getch();
+            refresh();
+            clear();
+            refresh();
+            return;
+        }
+    }
+    posy++;
+    validInput = false;
+
+    if (sekunden == 0)
+    {
+        sekunden = rand() % 60;
+    }
+    mvprintw(getcury(stdscr) - 1, 35, "%i\n", sekunden);
 
     printw("a) ");
     printw("Aktuelle Uhrzeit = %i:%i:%i Uhr\n", stunden, minuten, sekunden);
@@ -150,29 +236,39 @@ void Aufgabe4()
     int minute;
     int sekunde;
     int try_counter = 0;
+    bool validInput = false;
+    int posy = 4;
 
     printw("Aufgabe 4 - Uhrzeit (Teil 2)\n");
     printw("\n");
-    printw("Geben Sie die Sekunden seit Mitternacht ein (0-86400): ");
-    x = read_int(5);
+    printw("Hinweis:\n");
+    printw("0 oder direktes Druecken von Enter generiert Zufallszahl.\n");
 
-    while (x < 0 || x > 86400)
+    while (!validInput)
     {
-        if (++try_counter >= 3)
+        printw("Geben Sie die Sekunden seit Mitternacht ein (0-86400): ");
+        scanInt(5, &x);
+        if (x == -1)
         {
-            printw("Zu viele ungueltige Eingaben.\n");
-            printw("Druecken Sie eine beliebige Taste, um fortzufahren...\n");
-            getch();
-            refresh();
             clear();
             refresh();
             return;
         }
-        printw("Ungueltige Eingabe!\n");
-        printw("Geben Sie die Sekunden seit Mitternacht ein (0-86400): ");
-        x = read_int(5);
+        else if (x == 0 || (x > 0 && x <= 86400))
+        {
+            validInput = true;
+        }
+        else
+        {
+            mvprintw(posy++, 0, "Ungueltige Eingabe!\n");
+            try_counter++;
+        }
     }
-
+    if (x == 0)
+    {
+        x = rand() % 86400 + 1;
+    }
+    mvprintw(getcury(stdscr) - 1, 55, "%i\n", x);
     stunde = x / 3600;
     minute = (x % 3600) / 60;
     sekunde = x % 3600 % 60;
@@ -272,7 +368,18 @@ void Aufgabe6()
     printw("Aufgabe 6 - Zahlenpalindrom\n");
     printw("\n");
     printw("Geben Sie gewuenschte 5-stellige Zahl ein: ");
-    zahl = read_int(5);
+    scanInt(5, &zahl);
+    if (zahl == -1)
+    {
+        clear();
+        refresh();
+        return;
+    }
+    else if (zahl == 0)
+    {
+        zahl = rand() % 99999 + 1;
+    }
+    mvprintw(getcury(stdscr) - 1, 43, "%i\n", zahl);
     einer = zahl % 10;
     zehner = (zahl / 10) % 10;
     hunderter = (zahl / 100) % 10;
@@ -306,12 +413,35 @@ void Aufgabe7()
 
     printw("Aufgabe 7 - ASCII Art Rechteck\n");
     printw("\n");
-
     printw("Geben Sie die Breite des Rechtecks ein: ");
-    breite = read_int(2);
+    scanInt(2, &breite);
+    if (breite == -1)
+    {
+        clear();
+        refresh();
+        return;
+    }
+    else if (breite == 0)
+    {
+        breite = rand() % 99 + 1;
+    }
+    mvprintw(getcury(stdscr) - 1, 40, "%i\n", breite);
 
     printw("Geben Sie die Hoehe des Rechtecks ein: ");
-    hoehe = read_int(2);
+    scanInt(2, &hoehe);
+    if (hoehe == -1)
+    {
+        clear();
+        refresh();
+        return;
+    }
+    else if (hoehe == 0)
+    {
+        hoehe = rand() % 99 + 1;
+        mvprintw(getcury(stdscr) - 1, 40, "%i\n", hoehe);
+        printw("Druecken Sie eine beliebige Taste, um fortzufahren...\n");
+        getch();
+    }
     int temp = breite;
     if (breite < COLS)
     {
@@ -396,7 +526,21 @@ void Aufgabe8()
     printw("Aufgabe 8 - ASCII Art Sanduhr\n");
     printw("\n");
     printw("Geben Sie die Hoehe der Sanduhr ein: ");
-    int hoehe = read_int(2);
+    int hoehe;
+    scanInt(2, &hoehe);
+    if (hoehe == -1)
+    {
+        clear();
+        refresh();
+        return;
+    }
+    else if (hoehe == 0)
+    {
+        hoehe = rand() % 99 + 1;
+        mvprintw(getcury(stdscr) - 1, 37, "%i\n", hoehe);
+        printw("Druecken Sie eine beliebige Taste, um fortzufahren...\n");
+        getch();
+    }
     int key;
     int padPosY = 0;
     int padPosX = 0;
